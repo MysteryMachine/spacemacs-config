@@ -251,7 +251,7 @@ layers configuration. You are free to put any user code."
   (global-set-key (kbd "C-x C-g") 'magit-commit)
   (global-set-key (kbd "C-x M-g") 'magit-push)
   (setq neo-show-hidden-files nil)
-  )
+  (setq neo-window-position 'right))
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
