@@ -39,7 +39,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(paredit)
+   dotspacemacs-additional-packages '(paredit cider)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -106,7 +106,7 @@ values."
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
    dotspacemacs-default-font '("Monaco"
-                               :size 18
+                               :size 16
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -187,7 +187,7 @@ values."
    ;; If non nil the frame is maximized when Emacs starts up.
    ;; Takes effect only if `dotspacemacs-fullscreen-at-startup' is nil.
    ;; (default nil) (Emacs 24.4+ only)
-   dotspacemacs-maximized-at-startup nil
+   dotspacemacs-maximized-at-startup t
    ;; A value from the range (0..100), in increasing opacity, which describes
    ;; the transparency level of a frame when it's active or selected.
    ;; Transparency can be toggled through `toggle-transparency'. (default 90)
@@ -241,15 +241,35 @@ in `dotspacemacs/user-config'."
   (add-hook 'clojure-mode-hook #'paredit-mode)
   )
 
+(defun custom-refresh ()
+  (interactive)
+  (cider-interactive-eval (format "(do (if user/system (user/reset) (clojure.tools.namespace.repl/refresh)))")))
+
+(defun system-toggle ()
+  (interactive)
+  (cider-interactive-eval (format "(if user/system (user/kill) (user/go))")))
+
+(defun none ())
+
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
   (global-set-key (kbd "C-x f") 'helm-projectile)
   (global-set-key (kbd "C-x C-f") 'spacemacs/helm-find-files)
-  
-  (global-set-key (kbd "C-x C-g") 'magit-commit)
-  (global-set-key (kbd "C-x M-g") 'magit-push)
+  (global-set-key (kbd "C-x C-z") 'system-toggle)
+  (global-set-key (kbd "C-x C-x") 'custom-refresh)
+
+  (global-set-key (kbd "C-x M-g") 'magit-commit)
+  (global-set-key (kbd "C-x C-M-g") 'magit-push)
+  (global-set-key (kbd "C-z") 'projectile-grep)
+  ;(global-set-key (kbd "C-e") 'cider-enlighten-mode)
+
+  ;(setq clojure-enable-fancify-symbols 't)
+  (setq cider-repl-toggle-pretty-printing 't)
+  (add-hook 'cider-repl-mode-hook #'paredit-mode)
+  (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
+
   (setq neo-show-hidden-files nil)
   (setq neo-window-position 'right))
 
