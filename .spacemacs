@@ -105,9 +105,9 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
-   dotspacemacs-default-font '("Monaco"
-                               :size 16
-                               :weight normal
+   dotspacemacs-default-font '("Consolas"
+                               :size 26
+                               :weight ultra-light
                                :width normal
                                :powerline-scale 1.1)
    ;; The leader key
@@ -232,6 +232,10 @@ values."
    dotspacemacs-whitespace-cleanup nil
    ))
 
+(defun fix-paredit ()
+  (global-set-key (kbd "C-<right>") nil)
+  (global-set-key (kbd "C-)") 'paredit-forward-slurp-sexp))
+
 (defun dotspacemacs/user-init ()
   "Initialization function for user code.
 It is called immediately after `dotspacemacs/init'.  You are free to put almost
@@ -239,6 +243,7 @@ any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
   (autoload 'enable-paredit-mode "paredit" "Turn on pseudo-structural editing of Lisp code." t)
   (add-hook 'clojure-mode-hook #'paredit-mode)
+  (add-hook 'clojure-mode-hook 'fix-paredit)
   )
 
 (defun custom-refresh ()
@@ -251,19 +256,45 @@ in `dotspacemacs/user-config'."
 
 (defun none ())
 
+(defun lein-figwheel ()
+  (interactive)
+  (when (not on?)
+    (setq on? 't)
+    (projectile-with-default-dir (projectile-project-root)
+      (async-shell-command "lein figwheel"))
+    (delete-window)))
+
+(defun lein-fig-connect ()
+  (interactive)
+  (cider-connect "localhost" 7888)
+  (cider-switch-to-repl-buffer)
+  (cider-interactive-eval (format "(cljs-repl)"))
+  (cider-repl-clear-buffer))
+
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
   (global-set-key (kbd "C-x f") 'helm-projectile)
   (global-set-key (kbd "C-x C-f") 'spacemacs/helm-find-files)
-  (global-set-key (kbd "C-x C-z") 'system-toggle)
-  (global-set-key (kbd "C-x C-x") 'custom-refresh)
+  ;; (global-set-key (kbd "C-x C-z") 'system-toggle)
+  ;; (global-set-key (kbd "C-x C-x") 'custom-refresh)
+  (global-set-key (kbd "C-x C-x") 'lein-figwheel)
+  (global-set-key (kbd "C-x C-z") 'lein-fig-connect)
 
   (global-set-key (kbd "C-x M-g") 'magit-commit)
   (global-set-key (kbd "C-x C-M-g") 'magit-push)
   (global-set-key (kbd "C-z") 'projectile-grep)
-  ;(global-set-key (kbd "C-e") 'cider-enlighten-mode)
+  (add-to-list 'exec-path "C:/Program Files/Git/bin")
+  (add-to-list 'exec-path "C:/Program Files/Git/bin")
+
+  (global-set-key (kbd "C-0") 'paredit-forward-slurp-sexp)
+  (global-set-key (kbd "C-9") 'paredit-backward-slurp-sexp)
+
+  (define-key global-map [(insert)] nil)
+
+  (global-set-key (kbd "C-}") 'paredit-forward-barf-sexp)
+  (global-set-key (kbd "C-{") 'paredit-backward-barf-sexp)
 
   ;(setq clojure-enable-fancify-symbols 't)
   (setq cider-repl-toggle-pretty-printing 't)
@@ -271,7 +302,12 @@ layers configuration. You are free to put any user code."
   (add-hook 'cider-repl-mode-hook #'rainbow-delimiters-mode)
 
   (setq neo-show-hidden-files nil)
-  (setq neo-window-position 'right))
+  (setq neo-window-position 'right)
+
+  (add-to-list 'exec-path "C:/Program Files/Git/bin")
+  (add-to-list 'exec-path "c:/Users/Titus/.lein/bin")
+
+  (setq on? nil)  )
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
